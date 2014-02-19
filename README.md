@@ -1,7 +1,7 @@
 Oops... something went wrong!
-===========================
-A few words about backup strategies for MongoDB
--------------------------
+------
+
+**A few words about backup strategies for MongoDB**
 
 **Author:** Łukasz Adamczyk
 
