@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>>Oops... something went wrong!</title>
+
+		<meta name="description" content="A few words about backup strategies for MongoDB">
+		<meta name="author" content="Łukasz Adamczyk">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<br>
+					<h1>Oops... something went wrong!</h1>
+					<br>
+					<h3>A few words about backup strategies for MongoDB</h3>
+					<br><br>
+					<small>Created by <a href="http://adamczyk.czest.pl">Łukasz Adamczyk</a></small>
+					<br>
+					<img src="gfx/avsystem.png" style="border: 0px; background: none; box-shadow: none;">
+				</section>
+
+				<section>
+					<h2><i>"There are two types of people in this world, those who have lost data, and those who are going to lose data"</i></h2>
+				</section>
+
+				<section>
+					<h2>Theory</h2>
+					<br>
+					<h3>Backup and DR testing</h3>
+					<br>
+					<img src="gfx/1.gif" style="zoom: 2">
+					<br>
+					<small>source: <a href="http://devopsreactions.tumblr.com/">devopsreactions.tumblr.com</a></small>
+				</section>
+				
+				<section>
+					<h2>Real life</h2>
+					<br>
+					<h3>Database backup has been failing for the last week</h3>
+					<br>
+					<img src="gfx/2.gif" style="zoom: 1">
+					<br>
+					<small>source: <a href="http://devopsreactions.tumblr.com/">devopsreactions.tumblr.com</a></small>
+				</section>
+
+				<section>
+					<h2>mongodump</h2>
+					<br>
+					<ul>
+						<li class="fragment">basic method</li>
+						<li class="fragment">well-designed dump structure</li>
+						<li class="fragment">dump data to BSON/JSON</li>
+						<li class="fragment">time-consuming</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>mongodump useful options</h2>
+					<br>
+					<ul>
+						<li class="fragment"><code>--dbpath --journal</code><br><br>to dump without running MongoDB instance</li>
+						<br>
+						<li class="fragment"><code>--oplog / --oplogReplay</code><br><br>to dump / restore specific point-in-time backup</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>snapshots</h2>
+					<br>
+					<ul>
+						<li class="fragment">very fast</li>
+						<li class="fragment">use journaling!</li>
+						<li class="fragment">only partial backup solution</li>
+						<li class="fragment">complex solution</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>snapshots examples</h2>
+					<br>
+					<ul>
+						<li class="fragment">Disk array snapshots</li>
+						<li class="fragment">LVM snapshots (from LVM2 rw)</li>
+						<li class="fragment">ZFS snapshots</li>
+						<li class="fragment">BTRFS subvolume snapshots</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Replication-based</h2>
+					<br>
+					<ul>
+						<li class="fragment">secondary member</li>
+						<li class="fragment">hidden member</li>
+						<li class="fragment">delayed member</li>
+					</ul>
+				</section>
+				
+				<section>
+					<h2>Secondary member example</h2>
+					<br>
+					<pre><code data-trim contenteditable style="font-size: 18px;">
+KMUG:SECONDARY> db.fsyncLock()
+{
+	"info" : "now locked against writes, use db.fsyncUnlock() to unlock",
+		"seeAlso" : "http://dochub.mongodb.org/core/fsynccommand",
+		"ok" : 1
+}
+KMUG:SECONDARY> exit
+bye
+root@KMUG:/tmp/backup-dir# mongodump
+(...)
+root@KMUG:/tmp/backup-dir# mongo
+MongoDB shell version: 2.4.8
+connecting to: test
+KMUG:SECONDARY> db.fsyncUnlock()
+{ "ok" : 1, "info" : "unlock completed" }
+					</code></pre>	
+				</section>
+
+				<section>
+					<h2>MongoDB Management Service Backup</h2>
+					<br>
+					<ul>
+						<li class="fragment">Cloud or on-premises software</li>
+						<li class="fragment">Paid option</li>
+						<li class="fragment">Only one defined snapshot schedule and retention policy</li>
+						<li class="fragment">Requires additional agent</li>
+						<li class="fragment">3 copies of data in at least 2 geographically dispersed locations</li>
+						<li class="fragment">Closed source</li>
+					</ul>
+				</section>
+				
+				<section>
+					<h2>Tayra</h2>
+					<br>
+					<ul>
+						<li class="fragment">Still beta release</li>
+						<li class="fragment">Oplog-based incremental backup</li>
+						<li class="fragment">Not so popular</li>
+						<li class="fragment">Open source</li>
+					</ul>
+				</section>
+				
+				<section>
+					<h1>Any questions?</h1>
+				</section>
+				
+				<section>
+					<h1>Thank you for your attention</h1>
+				</section>
+				
+				<section>
+					<img src="gfx/avsystem-big.png" style="border: 0px; background: none; box-shadow: none;">
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: 'default',
+				transition: 'zoom', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
